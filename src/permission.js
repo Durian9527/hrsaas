@@ -62,3 +62,35 @@
 //   // finish progress bar
 //   NProgress.done()
 // })
+
+// 权限拦截在路由跳转 路由守卫
+import router from './router'
+import store from './store'
+import nProgress from 'nprogress'
+import 'nprogress/nprogress'
+
+const whiteList = ['/login', '/404']
+// 前置守卫
+router.beforeEach((to, from, next) => {
+// 开启进度条
+  nProgress.start()
+  if (store.getters.token) {
+    if (to.path === '/login') {
+      next('/')
+    } else {
+      next()
+    }
+  } else {
+    if (whiteList.indexOf(to.path) > -1) {
+      next()
+    } else {
+      next('/login')
+    }
+  }
+  nProgress.done()
+})
+// 后置守卫
+router.afterEach(() => {
+  // 关闭进度条
+  nProgress.done()
+})
