@@ -24,6 +24,12 @@ export function getUserInfo(data) {
 //   })
 // }
 
+export function getUserDetailById(id) {
+  return request({
+    url: `/sys/user/${id}`
+  })
+}
+
 export function logout() {
   return request({
     url: '/vue-admin-template/user/logout',

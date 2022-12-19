@@ -71,13 +71,17 @@ import 'nprogress/nprogress'
 
 const whiteList = ['/login', '/404']
 // 前置守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async(to, from, next) => {
 // 开启进度条
   nProgress.start()
   if (store.getters.token) {
     if (to.path === '/login') {
       next('/')
     } else {
+      // 如果vuex中没有用户资料，则调用getUserInfo接口获取用户资料
+      if (!store.getters.userId) {
+        await store.dispatch('user/getUserInfo')
+      }
       next()
     }
   } else {
