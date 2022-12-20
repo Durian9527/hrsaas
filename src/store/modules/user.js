@@ -1,4 +1,4 @@
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { getToken, setToken, removeToken, setTimeStamp } from '@/utils/auth'
 import { login, getUserInfo, getUserDetailById } from '@/api/user'
 // 状态
 const state = {
@@ -27,6 +27,7 @@ const actions = {
   async login(context, data) {
     const result = await login(data)
     context.commit('setToken', result)
+    setTimeStamp()
   },
   async getUserInfo(context) {
     const result = await getUserInfo()
@@ -36,6 +37,10 @@ const actions = {
     context.commit('setUserInfo', baseResult)
     // 权限用
     return result
+  },
+  logout(context) {
+    context.commit('removeToken')
+    context.commit('removeUserInfo')
   }
 }
 
