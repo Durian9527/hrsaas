@@ -37,7 +37,7 @@ export default {
     // 拿到当前操作的节点
     treeNode: {
       type: Object,
-      required: true
+      default: null
     }
   },
   data() {

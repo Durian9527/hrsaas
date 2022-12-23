@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-container">
+  <div v-loading="loading" class="dashboard-container">
     <div class="app-container">
       <el-card class="tree-card">
         <TreeTools :tree-node="company" :is-root="true" @addDepts="addDepts" />
@@ -36,7 +36,8 @@ export default {
       departs: [],
       company: {},
       showDialog: false,
-      node: null
+      node: null,
+      loading: false // 用来控制进度弹层的显示和隐藏
     }
   },
   created() {
@@ -44,10 +45,12 @@ export default {
   },
   methods: {
     async getDepartments() {
+      this.loading = true
       const result = await getDepartments()
       this.company = { name: result.companyName, manager: '负责人', id: '' }
       this.departs = transListToTreeData(result.depts, '')
-      console.log(result)
+      // console.log(result)
+      this.loading = false
     },
     addDepts(node) {
       this.showDialog = true
