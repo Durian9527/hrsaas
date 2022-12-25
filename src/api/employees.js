@@ -6,3 +6,23 @@ export function getEmployeeSimple() {
     method: 'GET'
   })
 }
+export function getEmployeeList(params) {
+  return request({
+    url: '/sys/user',
+    method: 'GET',
+    params
+  })
+}
+export function delEmployee(id) {
+  return request({
+    url: `/sys/user/${id}`,
+    method: 'DELETE'
+  })
+}
+export function addEmployee(data) {
+  return request({
+    url: '/sys/user',
+    method: 'POST',
+    data
+  })
+}
