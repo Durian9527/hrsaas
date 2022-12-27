@@ -14,6 +14,11 @@
       <el-table v-loading="loading" :data="list" border>
         <el-table-column type="index" label="序号" sortable="" />
         <el-table-column label="姓名" prop="username" sortable="" />
+        <el-table-column label="头像" style="width: 120px" align="center">
+          <template v-slot="{ row }">
+            <img v-imagerror="require('@/./assets/common/bigUserHeader.png')" :src="row.staffPhoto" alt="" style="border-radius: 50%; width: 100px; height: 100px; padding: 10px" @click="showQrCode(row.staffPhoto)">
+          </template>
+        </el-table-column>
         <el-table-column label="工号" prop="workNumber" sortable="" />
         <el-table-column label="聘用形式" prop="formOfEmployment" sortable="" :formatter="formatEmployment" />
         <el-table-column label="部门" prop="departmentName" sortable="" />
@@ -48,6 +53,11 @@
       </el-row>
     </div>
     <addEmployee :show-dialog.sync="showDialog" />
+    <el-dialog title="二维码" :visible.sync="showCodeDialog">
+      <el-row type="flex" justify="center">
+        <canvas ref="myCanvas" />
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
@@ -56,6 +66,7 @@ import { getEmployeeList, delEmployee } from '@/api/employees'
 import EmployeeEnum from '@/api/constant/employees'
 import addEmployee from './components/add-employee.vue'
 import { formatDate } from '@/filters'
+import QrCode from 'qrcode'
 export default {
   components: {
     addEmployee
@@ -69,7 +80,8 @@ export default {
         size: 10,
         total: 0
       },
-      showDialog: false
+      showDialog: false,
+      showCodeDialog: false
     }
   },
   created() {
@@ -152,6 +164,16 @@ export default {
       })
       // return rows.map(item => Object.keys(headers).map(key => item[headers[key]]))
       // 需要处理时间格式问题
+    },
+    showQrCode(url) {
+      if (url) {
+        this.showCodeDialog = true
+        this.$nextTick(() => {
+          QrCode.toCanvas(this.$refs.myCanvas, url)
+        })
+      } else {
+        this.$message.warning('该用户还未上传头像')
+      }
     }
   }
 }

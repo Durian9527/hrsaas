@@ -4,8 +4,8 @@
       <i class="el-icon-plus" />
     </el-upload>
     <el-progress v-if="showPercent" :percentage="percent" style="width: 200px" />
-    <el-dialog :visible.sync="showDialog">
-      <img :src="imgUrl" alt="" title="图片预览" style="width: 100%;">
+    <el-dialog :visible.sync="showDialog" title="图片预览">
+      <img :src="imgUrl" alt="" style="width:100%;">
     </el-dialog>
   </div>
 </template>
