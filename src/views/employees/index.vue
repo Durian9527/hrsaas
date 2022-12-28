@@ -8,7 +8,7 @@
         <template v-slot:after>
           <el-button size="small" type="success" @click="$router.push('/import')">Excel导入</el-button>
           <el-button size="small" type="danger" @click="exportData">Excel导出</el-button>
-          <el-button size="small" type="primary" @click="showDialog = true">新增员工</el-button>
+          <el-button :disabled="!checkPermission('add-yuangong')" size="small" type="primary" @click="showDialog = true">新增员工</el-button>
         </template>
       </PageTools>
       <el-table v-loading="loading" :data="list" border>
@@ -42,7 +42,7 @@
             <el-button type="text" size="small">转正</el-button>
             <el-button type="text" size="small">调岗</el-button>
             <el-button type="text" size="small">离职</el-button>
-            <el-button type="text" size="small">角色</el-button>
+            <el-button type="text" size="small" @click="editRole(row.id)">角色</el-button>
             <el-button type="text" size="small" @click="delEmployee(row.id)">删除</el-button>
           </template>
         </el-table-column>
@@ -58,6 +58,7 @@
         <canvas ref="myCanvas" />
       </el-row>
     </el-dialog>
+    <AssignRole ref="assignRole" :show-role-dialog.sync="showRoleDialog" :user-id="userId" />
   </div>
 </template>
 
@@ -65,11 +66,13 @@
 import { getEmployeeList, delEmployee } from '@/api/employees'
 import EmployeeEnum from '@/api/constant/employees'
 import addEmployee from './components/add-employee.vue'
+import AssignRole from './components/assign-role.vue'
 import { formatDate } from '@/filters'
 import QrCode from 'qrcode'
 export default {
   components: {
-    addEmployee
+    addEmployee,
+    AssignRole
   },
   data() {
     return {
@@ -81,7 +84,9 @@ export default {
         total: 0
       },
       showDialog: false,
-      showCodeDialog: false
+      showCodeDialog: false,
+      showRoleDialog: false,
+      userId: null
     }
   },
   created() {
@@ -174,6 +179,11 @@ export default {
       } else {
         this.$message.warning('该用户还未上传头像')
       }
+    },
+    async editRole(id) {
+      this.userId = id
+      await this.$refs.assignRole.getUserDetailById(id)
+      this.showRoleDialog = true
     }
   }
 }

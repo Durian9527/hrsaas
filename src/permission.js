@@ -80,9 +80,13 @@ router.beforeEach(async(to, from, next) => {
     } else {
       // 如果vuex中没有用户资料，则调用getUserInfo接口获取用户资料
       if (!store.getters.userId) {
-        await store.dispatch('user/getUserInfo')
+        const { roles } = await store.dispatch('user/getUserInfo')
+        const routes = await store.dispatch('permission/filterRoutes', roles.menus)
+        router.addRoutes([...routes, { path: '*', redirect: '/404', hidden: true }])
+        next(to.path)
+      } else {
+        next()
       }
-      next()
     }
   } else {
     if (whiteList.indexOf(to.path) > -1) {

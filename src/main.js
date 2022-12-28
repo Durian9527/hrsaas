@@ -13,6 +13,7 @@ import store from './store'
 import router from './router'
 import * as directives from '@/directives'
 import * as filters from '@/filters'
+import CheckPermission from '@/mixin/checkPermission'
 import '@/icons' // icon
 import '@/permission' // permission control
 // 引入需要全局注册的组件
@@ -31,6 +32,7 @@ Object.keys(filters).forEach(key => {
 })
 
 Vue.use(Components)
+Vue.mixin(CheckPermission)
 Vue.config.productionTip = false
 
 new Vue({
