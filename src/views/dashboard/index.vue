@@ -5,11 +5,11 @@
       <div>
         <div class="fl headL">
           <div class="headImg">
-            <img src="@/assets/common/head.jpg">
+            <img v-imagerror="defaultImg" :src="staffPhoto">
           </div>
           <div class="headInfoTip">
-            <p class="firstChild">早安，管理员，祝你开心每一天！</p>
-            <p class="lastChild">早安，管理员，祝你开心每一天！</p>
+            <p class="firstChild">早安，{{ name }}，祝你开心每一天！</p>
+            <p class="lastChild">{{ name }} | {{ userInfo.company }} - {{ userInfo.departmentName }}</p>
           </div>
         </div>
         <div class="fr" />
@@ -24,7 +24,8 @@
           <div slot="header" class="header">
             <span>工作日历</span>
           </div>
-        <!-- 放置日历组件 -->
+          <!-- 放置日历组件 -->
+          <worlCalendar />
         </el-card>
         <!-- 公告 -->
         <el-card class="box-card">
@@ -71,10 +72,10 @@
             <span>流程申请</span>
           </div>
           <div class="sideNav">
-            <el-button class="sideBtn">加班离职</el-button>
+            <el-button class="sideBtn" @click="showDialog = true">加班离职</el-button>
             <el-button class="sideBtn">请假调休</el-button>
-            <el-button class="sideBtn">审批列表</el-button>
-            <el-button class="sideBtn">我的信息</el-button>
+            <el-button class="sideBtn" @click="$router.push('/users/approvals')">审批列表</el-button>
+            <el-button class="sideBtn" @click="$router.push('/users/info')">我的信息</el-button>
           </div>
         </el-card>
 
@@ -83,7 +84,8 @@
           <div slot="header" class="header">
             <span>绩效指数</span>
           </div>
-        <!-- 放置雷达图 -->
+          <!-- 放置雷达图 -->
+          <Radar />
         </el-card>
         <!-- 帮助连接 -->
         <el-card class="box-card">
@@ -115,19 +117,86 @@
         </el-card>
       </el-col>
     </el-row>
+    <!-- 离职弹层 -->
+    <el-dialog :visible="showDialog" title="离职申请" @close="btnCancel">
+      <el-form ref="ruleForm" :model="ruleForm" :rules="rules" label-width="120px">
+        <el-form-item label="期望离职时间" prop="exceptTime">
+          <!-- 离职时间 -->
+          <el-date-picker v-model="ruleForm.exceptTime" value-format="yyyy-MM-dd HH:mm:ss" type="datetime" />
+        </el-form-item>
+        <!-- 输入框 -->
+        <el-form-item label="离职原因" prop="reason">
+          <el-input v-model="ruleForm.reason" type="textarea" :rows="3" style="width: 70%;" />
+        </el-form-item>
+      </el-form>
+      <el-row slot="footer" type="flex" justify="center">
+        <el-col :span="6">
+          <el-button type="primary" size="small" @click="btnOK">确定</el-button>
+          <el-button size="small" @click="btnCancel">取消</el-button>
+        </el-col>
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, createNamespacedHelpers } from 'vuex'
+const { mapState } = createNamespacedHelpers('user')
+import worlCalendar from './components/work-calendar.vue'
+import Radar from './components/radar.vue'
+import { startProcess } from '@/api/approvals'
 
 export default {
   name: 'Dashboard',
+  components: {
+    worlCalendar,
+    Radar
+  },
+  data() {
+    return {
+      defaultImg: require('@/assets/common/head.jpg'),
+      showDialog: false,
+      ruleForm: {
+        exceptTime: '',
+        reason: '',
+        processKey: 'process_dimission', // 特定的审批
+        processName: '离职'
+      },
+      rules: {
+        exceptTime: [{ required: true, message: '离职时间不能为空', trigger: 'blur' }],
+        reason: [{ required: true, message: '离职原因不能为空', trigger: 'blur' }]
+      }
+    }
+  },
   computed: {
     ...mapGetters([
-      'name'
-    ])
+      'name', 'staffPhoto'
+    ]),
+    ...mapState(['userInfo'])
+  },
+  methods: {
+    btnOK() {
+      this.$refs.ruleForm.validate(async isOK => {
+        if (isOK) {
+          const data = { ...this.ruleForm, userId: this.userInfo.userId, username: this.userInfo.username }
+          await startProcess(data)
+          this.$message.success('提交流程成功')
+          this.showDialog = false
+        }
+      })
+    },
+    btnCancel() {
+      this.ruleForm = {
+        exceptTime: '',
+        reason: '',
+        processKey: 'process_dimission', // 特定的审批
+        processName: '离职'
+      }
+      this.$refs.ruleForm.resetFields()
+      this.showDialog = false
+    }
   }
+
 }
 </script>
 
